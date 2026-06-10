@@ -138,7 +138,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <section id="sec-dijkstra" class="algo-section active">
   <div class="sec-hd">
     <h2>Dijkstra 最短路徑</h2>
-    <p>貪心策略，每步選出 dist 最小的未訪問節點並鬆弛鄰邊 | O((V+E) log V) | 不支援負邊</p>
+    <p>貪心策略，每步選出 dist 最小的未訪問節點並鬆弛鄰邊 | O((V+E) log V) | 不支援負邊 <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;margin-left:6px;vertical-align:middle">🟣 BFS-like</span></p>
   </div>
   <div class="atabs">
     <button class="atab on" onclick="dijSw(0,this)">圖 1（基礎）</button>
@@ -180,7 +180,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <section id="sec-bf" class="algo-section">
   <div class="sec-hd">
     <h2>Bellman-Ford 最短路徑</h2>
-    <p>重複鬆弛所有邊 V-1 輪 | O(VE) | 支援負邊 | 可偵測負環（第 V 輪仍更新）</p>
+    <p>重複鬆弛所有邊 V-1 輪 | O(VE) | 支援負邊 | 可偵測負環（第 V 輪仍更新） <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;margin-left:6px;vertical-align:middle">🟣 BFS-like</span></p>
   </div>
   <div class="atabs">
     <button class="atab on" onclick="bfSw(0,this)">圖 1（無負邊）</button>
@@ -223,7 +223,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <section id="sec-fw" class="algo-section">
   <div class="sec-hd">
     <h2>Floyd-Warshall 所有點對最短路徑</h2>
-    <p>DP，逐一把節點 k 納入可用中繼站 | O(V³) | 支援負邊 | 負環偵測：dist[i][i] &lt; 0</p>
+    <p>DP，逐一把節點 k 納入可用中繼站 | O(V³) | 支援負邊 | 負環偵測：dist[i][i] &lt; 0 <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;margin-left:6px;vertical-align:middle">🟣 BFS-like</span></p>
   </div>
   <div class="alayout">
     <div class="agraph">
@@ -259,7 +259,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <section id="sec-mst" class="algo-section">
   <div class="sec-hd">
     <h2>最小生成樹（MST）</h2>
-    <p>Prim：從起點貪心生長 | Kruskal：排序邊 + Union-Find | 複雜度皆 O(E log E)</p>
+    <p>Prim：從起點貪心生長 | Kruskal：排序邊 + Union-Find | 複雜度皆 O(E log E) <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;margin-left:6px;vertical-align:middle">🟣 BFS-like</span> <span style="display:inline-block;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;background:#F0F0F0;color:#666;margin-left:4px;vertical-align:middle">⚪ 其他</span></p>
   </div>
   <div class="atabs">
     <button class="atab gon" onclick="mstSw(0,this)">Prim（從起點生長）</button>
@@ -644,5 +644,58 @@ function mstSw(i,btn){mstG=i;mstS=0;document.querySelectorAll('#sec-mst .atab').
 // ── INIT ──────────────────────────────────────────────────────
 dijRender();bfRender();fwRender();mstRender();
 </script>
+
+<!-- ========== TRAVERSAL SUMMARY ========== -->
+<section style="padding:0 20px 24px">
+  <div class="acard" style="background:var(--bg);border:.5px solid var(--border2);border-radius:var(--rl);padding:16px;margin-top:4px;">
+    <h3 style="margin:0 0 10px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;">📋 演算法遍歷方式總整理</h3>
+    <div style="font-size:12px;line-height:1.8;color:var(--text);">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="border-bottom:1px solid var(--border);">
+          <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;">演算法</th>
+          <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;">遍歷方式</th>
+          <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;">資料結構</th>
+          <th style="padding:5px 8px;text-align:left;font-size:10px;color:var(--text3);font-weight:600;">原因</th>
+        </tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:6px 8px;font-weight:600;">Dijkstra</td>
+            <td style="padding:6px 8px;"><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;">BFS-like</span></td>
+            <td style="padding:6px 8px;">Priority Queue（Min-Heap）</td>
+            <td style="padding:6px 8px;color:var(--text2);">每步選 dist 最小的未訪問節點擴展，像 BFS 加上權重排序。邊權都為 1 時行為等同 BFS。</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:6px 8px;font-weight:600;">Bellman-Ford</td>
+            <td style="padding:6px 8px;"><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;">BFS-like</span></td>
+            <td style="padding:6px 8px;">Array（逐輪遍歷所有邊）</td>
+            <td style="padding:6px 8px;color:var(--text2);">每一輪對所有邊鬆弛，類似 BFS 的層層擴散。第 k 輪後保證找到長度 ≤ k 的最佳路徑。</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:6px 8px;font-weight:600;">Floyd-Warshall</td>
+            <td style="padding:6px 8px;"><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;background:#DBEAFE;color:#2563EB;">DP</span></td>
+            <td style="padding:6px 8px;">二維矩陣（三層迴圈）</td>
+            <td style="padding:6px 8px;color:var(--text2);">不是 traversal，是 DP：逐步將節點 k 納入可用中繼站。跟 BFS/DFS 遍歷順序無關。</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:6px 8px;font-weight:600;">Prim</td>
+            <td style="padding:6px 8px;"><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;background:#F3E8FF;color:#7C3AED;">BFS-like</span></td>
+            <td style="padding:6px 8px;">Priority Queue（Min-Heap）</td>
+            <td style="padding:6px 8px;color:var(--text2);">跟 Dijkstra 結構幾乎一樣，從起點透過 Priority Queue 選最小邊向外生長。屬於貪心擴散。</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 8px;font-weight:600;">Kruskal</td>
+            <td style="padding:6px 8px;"><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;background:#F0F0F0;color:#666;">其他</span></td>
+            <td style="padding:6px 8px;">排序陣列 + Union-Find</td>
+            <td style="padding:6px 8px;color:var(--text2);">先把所有邊排序，再依序嘗試加入。不依賴圖的遍歷順序，只看權重和集合關係。</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px;">
+        <b>🔑 重點：</b>Dijkstra 是 BFS 在加權圖上的推廣；Prim 跟 Dijkstra 共用同一個核心邏輯（Priority Queue + 貪心選最小）；Bellman-Ford 層層擴散本質也是 BFS；Floyd-Warshall 是 DP；Kruskal 是排序 + Union-Find。
+      </div>
+    </div>
+  </div>
+</section>
+
 </body>
 </html>

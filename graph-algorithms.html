@@ -691,38 +691,79 @@ function mstReset(){mstS=0;mstRender();}
 function mstSw(i,btn){mstG=i;mstS=0;document.querySelectorAll('#sec-mst .atab').forEach((b,j)=>{b.classList.remove('on','gon');if(j===i)b.classList.add('gon');});mstRender();}
 
 
-// ── PRACTICE / RANDOM PROBLEM GENERATOR ─────────────────────────
-const P_NAMES='ABCDEFGH';
+// ── PRACTICE / FIXED PROBLEM GENERATOR ──────────────────────────
+const P_LAYOUTS=[
+  {
+    name:'方陣四點',
+    nodes:[{id:'A',x:100,y:220},{id:'B',x:100,y:80},{id:'C',x:380,y:80},{id:'D',x:380,y:220}],
+    baseEdges:[['A','B'],['B','C'],['C','D'],['D','A'],['A','C'],['B','D']]
+  },
+  {
+    name:'散開四點',
+    nodes:[{id:'B',x:80,y:130},{id:'A',x:120,y:240},{id:'D',x:340,y:90},{id:'C',x:390,y:190}],
+    baseEdges:[['A','C'],['A','D'],['D','C'],['B','C'],['B','A']]
+  },
+  {
+    name:'鑽石五點',
+    nodes:[{id:'A',x:245,y:60},{id:'B',x:80,y:140},{id:'C',x:170,y:240},{id:'D',x:320,y:240},{id:'E',x:410,y:140}],
+    baseEdges:[['A','B'],['A','E'],['B','C'],['C','D'],['D','E'],['A','C'],['A','D'],['B','D'],['B','E']]
+  },
+  {
+    name:'環狀六點',
+    nodes:[{id:'A',x:245,y:50},{id:'B',x:100,y:100},{id:'C',x:100,y:210},{id:'D',x:245,y:250},{id:'E',x:390,y:210},{id:'F',x:390,y:100}],
+    baseEdges:[['A','B'],['B','C'],['C','D'],['D','E'],['E','F'],['F','A'],['A','C'],['A','D'],['A','E'],['B','D'],['B','E'],['B','F'],['C','E'],['C','F'],['D','F']]
+  }
+];
 function rI(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function rP(a){return a[Math.floor(Math.random()*a.length)];}
+function shuf(a){const c=[...a];for(let i=c.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[c[i],c[j]]=[c[j],c[i]];}return c;}
 
-function genGraph(n,isDirected,allowNeg){
-  const nodes=[];for(let i=0;i<n;i++)nodes.push({id:P_NAMES[i],x:rI(60,430),y:rI(60,230)});
-  const edges=[];
-  if(isDirected){
-    const conn=[0],unconn=Array.from({length:n-1},(_,i)=>i+1);
-    while(unconn.length){
-      const u=rP(conn),vi=rI(0,unconn.length-1),v=unconn[vi];
-      unconn.splice(vi,1);conn.push(v);
-      const w=allowNeg?rI(-5,20):rI(1,20);if(w!==0)edges.push({f:P_NAMES[u],t:P_NAMES[v],w:w});
-    }
-  }else{
-    const conn=[0],unconn=Array.from({length:n-1},(_,i)=>i+1);
-    while(unconn.length){
-      const u=rP(conn),vi=rI(0,unconn.length-1),v=unconn[vi];
-      unconn.splice(vi,1);conn.push(v);
-      const w=allowNeg?rI(-5,20):rI(1,20);if(w!==0)edges.push({f:P_NAMES[u],t:P_NAMES[v],w:w});
-    }
-  }
-  const maxE=isDirected?n*(n-1):(n*(n-1)/2);
-  const extra=rI(1,Math.min(5,maxE-(n-1)));
-  for(let i=0;i<extra;i++){
-    const u=rI(0,n-1),v=rI(0,n-1);if(u===v)continue;
-    const uN=P_NAMES[u],vN=P_NAMES[v];
-    const dup=edges.some(e=>e.f===uN&&e.t===vN)||(!isDirected&&edges.some(e=>e.f===vN&&e.t===uN));
-    if(dup)continue;
+function genFixedGraph(layoutIdx,isDirected,allowNeg){
+  const ly=P_LAYOUTS[layoutIdx%P_LAYOUTS.length];
+  const nodes=JSON.parse(JSON.stringify(ly.nodes));
+  const base=shuf([...ly.baseEdges]);
+  const n=nodes.length;
+  // Build spanning tree for connectivity
+  const conn=new Set([nodes[0].id]),edges=[];
+  const unconn=new Set(nodes.slice(1).map(n=>n.id));
+  for(const e of base){
+    if(unconn.size===0)break;
+    const a=e[0],b=e[1];
+    if(conn.has(a)&&unconn.has(b)){conn.add(b);unconn.delete(b);}
+    else if(conn.has(b)&&unconn.has(a)){conn.add(a);unconn.delete(a);}
+    else continue;
     const w=allowNeg?rI(-5,20):rI(1,20);if(w===0)continue;
-    edges.push({f:uN,t:vN,w:w});
+    edges.push({f:a,t:b,w:w});
+  }
+  // Fallback: connect any remaining with random edges
+  while(unconn.size>0){
+    const v=Array.from(unconn)[0],u=rP(Array.from(conn));
+    conn.add(v);unconn.delete(v);
+    const w=allowNeg?rI(-5,20):rI(1,20);if(w===0)continue;
+    edges.push({f:u,t:v,w:w});
+  }
+  // Add 0~3 extra edges from remaining base edges
+  const used=new Set(edges.map(e=>e.f<e.t?e.f+'-'+e.t:e.t+'-'+e.f));
+  const remain=base.filter(e=>{
+    const k=e[0]<e[1]?e[0]+'-'+e[1]:e[1]+'-'+e[0];
+    return !used.has(k);
+  });
+  const extra=rI(0,Math.min(3,remain.length));
+  for(let i=0;i<extra;i++){
+    if(!remain.length)break;
+    const e=remain.splice(Math.floor(Math.random()*remain.length),1)[0];
+    const w=allowNeg?rI(-5,20):rI(1,20);if(w===0)continue;
+    edges.push({f:e[0],t:e[1],w:w});
+  }
+  if(isDirected){
+    const und=[...edges];edges.length=0;
+    und.forEach(e=>{
+      edges.push({f:e.f,t:e.t,w:e.w});
+      if(Math.random()<0.35){
+        const rw=allowNeg?rI(-5,20):rI(1,20);
+        if(rw!==0&&rw!==e.w)edges.push({f:e.t,t:e.f,w:rw});
+      }
+    });
   }
   return{nodes,edges};
 }
@@ -773,7 +814,7 @@ function sFW(g){
   return{d,ns};
 }
 function sPrim(g){
-  const inM=new Set(),mst=[],tw=0;
+  const inM=new Set(),mst=[];
   inM.add(g.nodes[0].id);
   while(inM.size<g.nodes.length){
     let me=null;
@@ -782,8 +823,9 @@ function sPrim(g){
       if(a!==b){if(!me||e.w<me.w)me=e;}
     });
     if(!me)break;
-    mst.push(me);tw+=me.w;inM.add(me.f);inM.add(me.t);
+    mst.push(me);inM.add(me.f);inM.add(me.t);
   }
+  const tw=mst.reduce((s,e)=>s+e.w,0);
   return{mst,tw};
 }
 function sKruskal(g){
@@ -809,9 +851,12 @@ function pSetType(t,btn){
 function pGen(){
   const t=pCur.type;
   let g,ans,txt,attempts=0;
+  // pick random layout index
+  let li;
   if(t==='dijkstra'){
     do{
-      g=genGraph(rI(4,6),true,false);
+      li=rI(0,P_LAYOUTS.length-1);
+      g=genFixedGraph(li,true,false);
       const src=g.nodes[0].id,tgts=g.nodes.slice(1).map(n=>n.id);
       const tgt=rP(tgts);
       const sol=sDij(g,src);
@@ -821,7 +866,8 @@ function pGen(){
     }while(attempts<50);
   }else if(t==='bf'){
     do{
-      g=genGraph(rI(4,5),true,true);
+      li=rI(0,1); // smaller graphs for BF (layouts 0-1)
+      g=genFixedGraph(li,true,true);
       const src=g.nodes[0].id;
       const sol=sBF(g,src);
       if(!sol.neg){
@@ -834,7 +880,8 @@ function pGen(){
     }while(attempts<50);
   }else if(t==='fw'){
     do{
-      g=genGraph(rI(4,5),true,false);
+      li=rI(0,2);
+      g=genFixedGraph(li,true,false);
       const ns=g.nodes.map(n=>n.id),src=rP(ns);
       let tgt=rP(ns);while(tgt===src)tgt=rP(ns);
       const sol=sFW(g);
@@ -844,8 +891,9 @@ function pGen(){
       attempts++;
     }while(attempts<50);
   }else if(t==='mst'){
-    g=genGraph(rI(4,6),false,false);
-    const sol=sPrim(g);
+    li=rI(0,P_LAYOUTS.length-1);
+    g=genFixedGraph(li,false,false);
+    const sol=sKruskal(g);
     ans=sol.tw;
     txt=`求此圖的 <b>最小生成樹（MST）</b> 總權重。<br>你可以使用 Prim 或 Kruskal 演算法。`;
   }
@@ -864,7 +912,8 @@ function pRnd(){
     if(!fn||!tn)return;
     h+=`<line x1="${fn.x}" y1="${fn.y}" x2="${tn.x}" y2="${tn.y}" stroke="#D3D1C7" stroke-width="1.5"/>`;
     const mx=(fn.x+tn.x)/2,my=(fn.y+tn.y)/2;
-    h+=`<text x="${mx}" y="${my}" text-anchor="middle" font-size="12" fill="#B4B2A9">${e.w}</text>`;
+    const dx=tn.y-fn.y,dy=fn.x-tn.x,L=Math.sqrt(dx*dx+dy*dy)||1;
+    h+=`<text x="${mx+dx/L*13}" y="${my+dy/L*13}" text-anchor="middle" font-size="12" fill="#B4B2A9" font-weight="400">${e.w}</text>`;
   });
   g.nodes.forEach(n=>{
     h+=`<circle cx="${n.x}" cy="${n.y}" r="21" fill="#888780"/>`;

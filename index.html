@@ -118,6 +118,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .ainfo .acard{min-width:unset;flex:unset;}
   .ainfo .acard:last-child{flex:unset;}
 }
+
+/* practice */
+#p-tabs{margin-bottom:12px;}
+#sec-practice input[type="text"]{flex:1;padding:6px 10px;border:.5px solid var(--border2);border-radius:var(--r);font-size:13px;min-width:80px;}
+.p-correct{color:#1D9E75;font-weight:600;}
+.p-wrong{color:#b91c1c;font-weight:600;}
+
 </style>
 </head>
 <body>
@@ -132,6 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="nav-btn" onclick="showSec('bf',this)">Bellman-Ford</button>
   <button class="nav-btn" onclick="showSec('fw',this)">Floyd-Warshall</button>
   <button class="nav-btn" onclick="showSec('mst',this)">MST (Prim / Kruskal)</button>
+  <button class="nav-btn" onclick="showSec('practice',this)">練習題</button>
 </nav>
 
 <!-- ========== DIJKSTRA ========== -->
@@ -286,6 +294,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="cb grn" id="m-prev" onclick="mstPrev()">← 上一步</button>
     <span class="scnt" id="m-cnt"></span>
     <button class="cb grn" id="m-next" onclick="mstNext()">下一步 →</button>
+  </div>
+</section>
+
+<section id="sec-practice" class="algo-section">
+  <div class="sec-hd">
+    <h2>演算法練習題生成器</h2>
+    <p>隨機生成圖論題目，手算後驗證答案 | 每次點「生成新題目」會產生不同的圖</p>
+  </div>
+  <div class="atabs" id="p-tabs">
+    <button class="atab on" onclick="pSetType('dijkstra',this)">Dijkstra 最短路徑</button>
+    <button class="atab" onclick="pSetType('bf',this)">Bellman-Ford 最短路徑</button>
+    <button class="atab" onclick="pSetType('fw',this)">Floyd-Warshall</button>
+    <button class="atab gon" onclick="pSetType('mst',this)">MST (Prim/Kruskal)</button>
+  </div>
+  <div class="alayout">
+    <div class="agraph">
+      <div class="leg" id="p-leg"></div>
+      <svg id="p-svg" viewBox="0 0 490 285" style="width:100%;height:auto;"></svg>
+    </div>
+    <div class="ainfo">
+      <div class="acard">
+        <h3>題目</h3>
+        <div class="sdesc" id="p-problem">點選「生成新題目」開始練習</div>
+      </div>
+      <div class="acard">
+        <h3>作答區</h3>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+          <input id="p-ans" type="text" placeholder="輸入數字答案...">
+          <button class="cb" onclick="pCheck()">檢查答案</button>
+        </div>
+        <div id="p-feedback" style="margin-top:6px;font-size:12px;"></div>
+      </div>
+      <div class="acard" style="flex:1">
+        <h3>操作</h3>
+        <div class="actrl" style="padding:0;background:transparent;border:none;justify-content:flex-start;gap:8px;">
+          <button class="cb grn" onclick="pGen()">🎲 生成新題目</button>
+          <button class="cb" onclick="pShowSol()">💡 看解答</button>
+        </div>
+        <div class="sdesc" id="p-sol" style="margin-top:8px;display:none;"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -641,8 +690,204 @@ function mstPrev(){if(mstS>0){mstS--;mstRender();}}
 function mstReset(){mstS=0;mstRender();}
 function mstSw(i,btn){mstG=i;mstS=0;document.querySelectorAll('#sec-mst .atab').forEach((b,j)=>{b.classList.remove('on','gon');if(j===i)b.classList.add('gon');});mstRender();}
 
+
+// ── PRACTICE / RANDOM PROBLEM GENERATOR ─────────────────────────
+const P_NAMES='ABCDEFGH';
+function rI(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rP(a){return a[Math.floor(Math.random()*a.length)];}
+
+function genGraph(n,isDirected,allowNeg){
+  const nodes=[];for(let i=0;i<n;i++)nodes.push({id:P_NAMES[i],x:rI(60,430),y:rI(60,230)});
+  const edges=[];
+  if(isDirected){
+    const conn=[0],unconn=Array.from({length:n-1},(_,i)=>i+1);
+    while(unconn.length){
+      const u=rP(conn),vi=rI(0,unconn.length-1),v=unconn[vi];
+      unconn.splice(vi,1);conn.push(v);
+      const w=allowNeg?rI(-5,20):rI(1,20);if(w!==0)edges.push({f:P_NAMES[u],t:P_NAMES[v],w:w});
+    }
+  }else{
+    const conn=[0],unconn=Array.from({length:n-1},(_,i)=>i+1);
+    while(unconn.length){
+      const u=rP(conn),vi=rI(0,unconn.length-1),v=unconn[vi];
+      unconn.splice(vi,1);conn.push(v);
+      const w=allowNeg?rI(-5,20):rI(1,20);if(w!==0)edges.push({f:P_NAMES[u],t:P_NAMES[v],w:w});
+    }
+  }
+  const maxE=isDirected?n*(n-1):(n*(n-1)/2);
+  const extra=rI(1,Math.min(5,maxE-(n-1)));
+  for(let i=0;i<extra;i++){
+    const u=rI(0,n-1),v=rI(0,n-1);if(u===v)continue;
+    const uN=P_NAMES[u],vN=P_NAMES[v];
+    const dup=edges.some(e=>e.f===uN&&e.t===vN)||(!isDirected&&edges.some(e=>e.f===vN&&e.t===uN));
+    if(dup)continue;
+    const w=allowNeg?rI(-5,20):rI(1,20);if(w===0)continue;
+    edges.push({f:uN,t:vN,w:w});
+  }
+  return{nodes,edges};
+}
+
+// solvers
+function sDij(g,src){
+  const dist={},prev={},unv=new Set();
+  g.nodes.forEach(n=>{dist[n.id]=Infinity;prev[n.id]=null;unv.add(n.id);});
+  dist[src]=0;
+  while(unv.size){
+    let u=null,best=Infinity;
+    unv.forEach(id=>{if(dist[id]<best){best=dist[id];u=id;}});
+    if(u===null||best===Infinity)break;
+    unv.delete(u);
+    g.edges.forEach(e=>{
+      if(e.f===u&&unv.has(e.t)){
+        const alt=dist[u]+e.w;
+        if(alt<dist[e.t]){dist[e.t]=alt;prev[e.t]=u;}
+      }
+    });
+  }
+  return{dist,prev};
+}
+function sBF(g,src){
+  const dist={};g.nodes.forEach(n=>dist[n.id]=Infinity);dist[src]=0;
+  const n=g.nodes.length;
+  for(let i=0;i<n-1;i++){
+    let up=false;
+    g.edges.forEach(e=>{
+      if(dist[e.f]!==Infinity&&dist[e.f]+e.w<dist[e.t]){dist[e.t]=dist[e.f]+e.w;up=true;}
+    });
+    if(!up)break;
+  }
+  let neg=false;
+  g.edges.forEach(e=>{
+    if(dist[e.f]!==Infinity&&dist[e.f]+e.w<dist[e.t])neg=true;
+  });
+  return{dist,neg};
+}
+function sFW(g){
+  const ns=g.nodes.map(n=>n.id),n=ns.length,idx={};
+  ns.forEach((id,i)=>idx[id]=i);
+  const d=Array(n).fill(null).map(()=>Array(n).fill(Infinity));
+  for(let i=0;i<n;i++)d[i][i]=0;
+  g.edges.forEach(e=>{const u=idx[e.f],v=idx[e.t];d[u][v]=Math.min(d[u][v],e.w);});
+  for(let k=0;k<n;k++)for(let i=0;i<n;i++)for(let j=0;j<n;j++)
+    if(d[i][k]+d[k][j]<d[i][j])d[i][j]=d[i][k]+d[k][j];
+  return{d,ns};
+}
+function sPrim(g){
+  const inM=new Set(),mst=[],tw=0;
+  inM.add(g.nodes[0].id);
+  while(inM.size<g.nodes.length){
+    let me=null;
+    g.edges.forEach(e=>{
+      const a=inM.has(e.f),b=inM.has(e.t);
+      if(a!==b){if(!me||e.w<me.w)me=e;}
+    });
+    if(!me)break;
+    mst.push(me);tw+=me.w;inM.add(me.f);inM.add(me.t);
+  }
+  return{mst,tw};
+}
+function sKruskal(g){
+  const es=[...g.edges].sort((a,b)=>a.w-b.w),p={},r=[];
+  g.nodes.forEach(n=>p[n.id]=n.id);
+  const find=x=>p[x]===x?x:p[x]=find(p[x]);
+  const union=(x,y)=>p[find(x)]=find(y);
+  let tw=0;
+  es.forEach(e=>{
+    if(find(e.f)!==find(e.t)){union(e.f,e.t);r.push(e);tw+=e.w;}
+  });
+  return{mst:r,tw};
+}
+
+let pCur={type:'dijkstra',g:null,ans:null};
+
+function pSetType(t,btn){
+  pCur.type=t;
+  document.querySelectorAll('#p-tabs .atab').forEach(b=>b.classList.remove('on','gon'));
+  btn.classList.add(t==='mst'?'gon':'on');
+  pGen();
+}
+function pGen(){
+  const t=pCur.type;
+  let g,ans,txt,attempts=0;
+  if(t==='dijkstra'){
+    do{
+      g=genGraph(rI(4,6),true,false);
+      const src=g.nodes[0].id,tgts=g.nodes.slice(1).map(n=>n.id);
+      const tgt=rP(tgts);
+      const sol=sDij(g,src);
+      ans=sol.dist[tgt];
+      if(ans!==Infinity){txt=`使用 <b>Dijkstra</b>，求 <b>${src}</b> → <b>${tgt}</b> 的最短距離。`;break;}
+      attempts++;
+    }while(attempts<50);
+  }else if(t==='bf'){
+    do{
+      g=genGraph(rI(4,5),true,true);
+      const src=g.nodes[0].id;
+      const sol=sBF(g,src);
+      if(!sol.neg){
+        const tgts=g.nodes.slice(1).map(n=>n.id);
+        const tgt=rP(tgts);
+        ans=sol.dist[tgt];
+        if(ans!==Infinity){txt=`使用 <b>Bellman-Ford</b>，求 <b>${src}</b> → <b>${tgt}</b> 的最短距離。<br>圖中可能含有負權重邊，但保證無負環。`;break;}
+      }
+      attempts++;
+    }while(attempts<50);
+  }else if(t==='fw'){
+    do{
+      g=genGraph(rI(4,5),true,false);
+      const ns=g.nodes.map(n=>n.id),src=rP(ns);
+      let tgt=rP(ns);while(tgt===src)tgt=rP(ns);
+      const sol=sFW(g);
+      const si=ns.indexOf(src),ti=ns.indexOf(tgt);
+      ans=sol.d[si][ti];
+      if(ans!==Infinity){txt=`使用 <b>Floyd-Warshall</b>，求 <b>${src}</b> → <b>${tgt}</b> 的最短距離。`;break;}
+      attempts++;
+    }while(attempts<50);
+  }else if(t==='mst'){
+    g=genGraph(rI(4,6),false,false);
+    const sol=sPrim(g);
+    ans=sol.tw;
+    txt=`求此圖的 <b>最小生成樹（MST）</b> 總權重。<br>你可以使用 Prim 或 Kruskal 演算法。`;
+  }
+  if(attempts>=50){txt='生成失敗，請再試一次。';ans=0;}
+  pCur.g=g;pCur.ans=ans;
+  pRnd();document.getElementById('p-problem').innerHTML=txt;
+  document.getElementById('p-ans').value='';
+  document.getElementById('p-feedback').innerHTML='';
+  document.getElementById('p-sol').style.display='none';
+}
+function pRnd(){
+  const g=pCur.g;if(!g)return;
+  let h='';
+  g.edges.forEach(e=>{
+    const fn=g.nodes.find(n=>n.id===e.f),tn=g.nodes.find(n=>n.id===e.t);
+    if(!fn||!tn)return;
+    h+=`<line x1="${fn.x}" y1="${fn.y}" x2="${tn.x}" y2="${tn.y}" stroke="#D3D1C7" stroke-width="1.5"/>`;
+    const mx=(fn.x+tn.x)/2,my=(fn.y+tn.y)/2;
+    h+=`<text x="${mx}" y="${my}" text-anchor="middle" font-size="12" fill="#B4B2A9">${e.w}</text>`;
+  });
+  g.nodes.forEach(n=>{
+    h+=`<circle cx="${n.x}" cy="${n.y}" r="21" fill="#888780"/>`;
+    h+=`<text x="${n.x}" y="${n.y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="white">${n.id}</text>`;
+  });
+  document.getElementById('p-svg').innerHTML=h;
+}
+function pCheck(){
+  const v=parseInt(document.getElementById('p-ans').value.trim(),10);
+  const fb=document.getElementById('p-feedback');
+  if(isNaN(v)){fb.innerHTML='<span class="p-wrong">請輸入數字。</span>';return;}
+  if(v===pCur.ans)fb.innerHTML='<span class="p-correct">✓ 正確！答案是 '+pCur.ans+'</span>';
+  else fb.innerHTML='<span class="p-wrong">✗ 錯誤。正確答案是 '+pCur.ans+'</span>';
+}
+function pShowSol(){
+  const s=document.getElementById('p-sol');
+  s.style.display='block';
+  s.innerHTML='<b>解答：</b>正確答案 = <b>'+pCur.ans+'</b>。<br><br>建議切換到對應的演算法分頁，逐步觀察執行過程，加深理解。';
+}
+
 // ── INIT ──────────────────────────────────────────────────────
 dijRender();bfRender();fwRender();mstRender();
+pCurrent= {type:'dijkstra'};pGen();
 </script>
 
 <!-- ========== TRAVERSAL SUMMARY ========== -->

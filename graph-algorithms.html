@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Algorithms 互動練習</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#ffffff;--bg2:#f8fafc;--bg3:#f0f4f8;
+  --bg-info:#eff6ff;--bg-success:#f0fdf4;--bg-danger:#fef2f2;
+  --text:#111827;--text2:#6b7280;--text3:#9ca3af;
+  --text-info:#1d4ed8;--text-success:#166534;--text-danger:#b91c1c;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.17);
+  --border-info:#93c5fd;--border-success:#86efac;
+  --r:8px;--rl:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;}
+.app-header{background:var(--bg);border-bottom:1px solid var(--border2);padding:14px 24px;display:flex;align-items:baseline;gap:12px;}
+.app-header h1{font-size:17px;font-weight:700;letter-spacing:-.01em;}
+.app-header p{font-size:12px;color:var(--text2);}
+.algo-nav{background:var(--bg);border-bottom:1px solid var(--border2);padding:0 20px;display:flex;gap:0;overflow-x:auto;}
+.nav-btn{padding:11px 18px;background:transparent;border:none;border-bottom:2.5px solid transparent;color:var(--text2);cursor:pointer;font-size:13px;font-weight:500;white-space:nowrap;transition:color .15s;}
+.nav-btn:hover{color:var(--text);}
+.nav-btn.active{color:#2563eb;border-bottom-color:#2563eb;}
+.algo-section{display:none;padding:20px;}
+.algo-section.active{display:block;}
+.sec-hd{margin-bottom:14px;}
+.sec-hd h2{font-size:18px;font-weight:600;margin-bottom:3px;}
+.sec-hd p{font-size:12px;color:var(--text2);}
+.atabs{display:flex;gap:7px;margin-bottom:12px;}
+.atab{padding:6px 16px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;}
+.atab.on{background:var(--bg-info);border-color:var(--border-info);color:var(--text-info);}
+.atab.gon{background:var(--bg-success);border-color:var(--border-success);color:var(--text-success);}
+.alayout{display:grid;grid-template-columns:1fr 290px;gap:10px;margin-bottom:10px;}
+.agraph{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--rl);padding:12px;}
+.ainfo{display:flex;flex-direction:column;gap:9px;}
+.acard{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--rl);padding:12px;}
+.acard h3{margin:0 0 9px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.actrl{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--rl);}
+.cb{padding:7px 18px;border:.5px solid var(--border-info);background:var(--bg-info);color:var(--text-info);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;transition:opacity .15s;}
+.cb:disabled{opacity:.3;cursor:default;}
+.cb.rst{background:var(--bg2);color:var(--text2);border-color:var(--border2);}
+.cb.grn{background:var(--bg-success);color:var(--text-success);border-color:var(--border-success);}
+.scnt{font-size:12px;color:var(--text2);min-width:110px;text-align:center;}
+.leg{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:9px;}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);}
+.ld{width:9px;height:9px;border-radius:50%;}
+.dtbl{width:100%;border-collapse:collapse;font-size:12px;}
+.dtbl th{color:var(--text3);padding:3px 5px;text-align:center;border-bottom:.5px solid var(--border);font-weight:500;font-size:10px;}
+.dtbl td{padding:5px 5px;text-align:center;color:var(--text);}
+.dtbl tr.sfin td{color:#1D9E75;}
+.dtbl tr.supd td{color:#185FA5;}
+.dtbl tr.shas td{color:#5DCAA5;}
+.dtbl tr.scur td{color:#BA7517;font-weight:600;}
+.etbl{width:100%;border-collapse:collapse;font-size:12px;}
+.etbl th{color:var(--text3);padding:3px 5px;text-align:center;border-bottom:.5px solid var(--border);font-weight:500;font-size:10px;}
+.etbl td{padding:4px 5px;text-align:center;color:var(--text);}
+.etbl tr.eadd td{color:#1D9E75;font-weight:600;}
+.etbl tr.eskip td{color:#b91c1c;}
+.etbl tr.ecur td{color:#BA7517;font-weight:600;}
+.fwmat{border-collapse:collapse;width:100%;font-size:12px;margin-bottom:6px;}
+.fwmat th,.fwmat td{padding:5px 7px;text-align:center;border:.5px solid var(--border);}
+.fwmat thead th{font-size:10px;font-weight:600;color:var(--text2);background:var(--bg2);}
+.fwmat tbody th{font-weight:600;font-size:11px;color:var(--text2);background:var(--bg2);}
+.fwmat td{color:var(--text);}
+.fwmat td.khl{background:#FAEEDA;color:#633806;}
+.fwmat th.kth{background:#EF9F27;color:white;font-weight:600;}
+.fwmat td.upd{background:#E6F1FB;color:#0C447C;font-weight:600;}
+.fwmat td.diag{color:var(--text3);}
+.kbg{display:inline-block;padding:2px 9px;background:#FAEEDA;color:#633806;border-radius:var(--r);font-size:11px;font-weight:600;margin-left:5px;}
+.sdesc{font-size:12px;color:var(--text);line-height:1.7;}
+.sdesc b{font-weight:600;}
+.sdesc code{font-family:monospace;background:var(--bg2);padding:1px 4px;border-radius:3px;font-size:11px;}
+.sronly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;}
+
+/* ── MOBILE ─────────────────────────────────────────── */
+@media(max-width:700px){
+  .app-header{padding:12px 16px;flex-direction:column;gap:2px;}
+  .app-header h1{font-size:16px;}
+  .app-header p{font-size:11px;}
+  .algo-nav{padding:0 4px;}
+  .nav-btn{padding:10px 12px;font-size:12px;}
+  .algo-section{padding:12px;}
+  .sec-hd{margin-bottom:10px;}
+  .sec-hd h2{font-size:16px;}
+  .sec-hd p{display:none;}
+  .atabs{flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+  .atab{padding:5px 12px;font-size:11px;}
+  .alayout{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .ainfo{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:8px;}
+  .ainfo .acard{min-width:220px;flex:0 0 auto;}
+  .ainfo .acard:last-child{flex:0 0 260px;}
+  .agraph svg{max-height:230px;}
+  .leg{gap:7px;}
+  .li{font-size:10px;}
+  .ld{width:8px;height:8px;}
+  .dtbl{font-size:11px;}
+  .dtbl th{font-size:9px;}
+  .etbl{font-size:11px;}
+  .etbl th{font-size:9px;}
+  .fwmat{font-size:11px;}
+  .fwmat th,.fwmat td{padding:4px 5px;}
+  .acard{padding:10px;}
+  .acard h3{margin-bottom:7px;}
+  .sdesc{font-size:11px;line-height:1.6;}
+  .actrl{gap:7px;padding:10px;}
+  .cb{padding:7px 13px;font-size:12px;}
+  .scnt{font-size:11px;min-width:80px;}
+  /* FW matrix overflow */
+  #sec-fw .acard:first-child{overflow-x:auto;}
+}
+@media(max-width:420px){
+  .ainfo{flex-direction:column;overflow-x:unset;}
+  .ainfo .acard{min-width:unset;flex:unset;}
+  .ainfo .acard:last-child{flex:unset;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Graph Algorithms</h1>
+  <p>最短路徑 &amp; MST 互動練習 — 期末考複習</p>
+</div>
+
+<nav class="algo-nav">
+  <button class="nav-btn active" onclick="showSec('dijkstra',this)">Dijkstra</button>
+  <button class="nav-btn" onclick="showSec('bf',this)">Bellman-Ford</button>
+  <button class="nav-btn" onclick="showSec('fw',this)">Floyd-Warshall</button>
+  <button class="nav-btn" onclick="showSec('mst',this)">MST (Prim / Kruskal)</button>
+</nav>
+
+<!-- ========== DIJKSTRA ========== -->
+<section id="sec-dijkstra" class="algo-section active">
+  <div class="sec-hd">
+    <h2>Dijkstra 最短路徑</h2>
+    <p>貪心策略，每步選出 dist 最小的未訪問節點並鬆弛鄰邊 | O((V+E) log V) | 不支援負邊</p>
+  </div>
+  <div class="atabs">
+    <button class="atab on" onclick="dijSw(0,this)">圖 1（基礎）</button>
+    <button class="atab" onclick="dijSw(1,this)">圖 2（進階）</button>
+  </div>
+  <div class="alayout">
+    <div class="agraph">
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:#888780"></div>未訪問</div>
+        <div class="li"><div class="ld" style="background:#BA7517"></div>當前</div>
+        <div class="li"><div class="ld" style="background:#185FA5"></div>本步更新</div>
+        <div class="li"><div class="ld" style="background:#1D9E75"></div>已確定</div>
+      </div>
+      <svg id="d-svg" viewBox="0 0 490 285" style="width:100%;height:auto;"></svg>
+    </div>
+    <div class="ainfo">
+      <div class="acard">
+        <h3>距離表</h3>
+        <table class="dtbl">
+          <thead><tr><th>節點</th><th>dist</th><th>前驅</th><th>狀態</th></tr></thead>
+          <tbody id="d-tbody"></tbody>
+        </table>
+      </div>
+      <div class="acard" style="flex:1">
+        <h3>本步說明</h3>
+        <div class="sdesc" id="d-desc"></div>
+      </div>
+    </div>
+  </div>
+  <div class="actrl">
+    <button class="cb rst" onclick="dijReset()">↺ 重置</button>
+    <button class="cb" id="d-prev" onclick="dijPrev()">← 上一步</button>
+    <span class="scnt" id="d-cnt"></span>
+    <button class="cb" id="d-next" onclick="dijNext()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ========== BELLMAN-FORD ========== -->
+<section id="sec-bf" class="algo-section">
+  <div class="sec-hd">
+    <h2>Bellman-Ford 最短路徑</h2>
+    <p>重複鬆弛所有邊 V-1 輪 | O(VE) | 支援負邊 | 可偵測負環（第 V 輪仍更新）</p>
+  </div>
+  <div class="atabs">
+    <button class="atab on" onclick="bfSw(0,this)">圖 1（無負邊）</button>
+    <button class="atab" onclick="bfSw(1,this)">圖 2（含負邊）</button>
+  </div>
+  <div class="alayout">
+    <div class="agraph">
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:#888780"></div>∞</div>
+        <div class="li"><div class="ld" style="background:#5DCAA5"></div>有限距離</div>
+        <div class="li"><div class="ld" style="background:#185FA5"></div>本輪更新</div>
+        <div class="li"><div class="ld" style="background:#1D9E75"></div>已收斂</div>
+        <div class="li"><span style="color:#D85A30;font-size:14px;line-height:1">—</span>&nbsp;負邊</div>
+      </div>
+      <svg id="bf-svg" viewBox="0 0 530 295" style="width:100%;height:auto;"></svg>
+    </div>
+    <div class="ainfo">
+      <div class="acard">
+        <h3>距離表</h3>
+        <table class="dtbl">
+          <thead><tr><th>節點</th><th>dist</th><th>狀態</th></tr></thead>
+          <tbody id="bf-tbody"></tbody>
+        </table>
+      </div>
+      <div class="acard" style="flex:1">
+        <h3>本輪說明</h3>
+        <div class="sdesc" id="bf-desc"></div>
+      </div>
+    </div>
+  </div>
+  <div class="actrl">
+    <button class="cb rst" onclick="bfReset()">↺ 重置</button>
+    <button class="cb" id="bf-prev" onclick="bfPrev()">← 上一輪</button>
+    <span class="scnt" id="bf-cnt"></span>
+    <button class="cb" id="bf-next" onclick="bfNext()">下一輪 →</button>
+  </div>
+</section>
+
+<!-- ========== FLOYD-WARSHALL ========== -->
+<section id="sec-fw" class="algo-section">
+  <div class="sec-hd">
+    <h2>Floyd-Warshall 所有點對最短路徑</h2>
+    <p>DP，逐一把節點 k 納入可用中繼站 | O(V³) | 支援負邊 | 負環偵測：dist[i][i] &lt; 0</p>
+  </div>
+  <div class="alayout">
+    <div class="agraph">
+      <svg id="fw-svg" viewBox="0 0 490 280" style="width:100%;height:auto;"></svg>
+    </div>
+    <div class="ainfo">
+      <div class="acard">
+        <h3>距離矩陣 <span id="fw-badge"></span></h3>
+        <table class="fwmat">
+          <thead><tr id="fw-head"></tr></thead>
+          <tbody id="fw-body"></tbody>
+        </table>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--text3);margin-top:4px;">
+          <span><span style="display:inline-block;width:9px;height:9px;background:#FAEEDA;border:.5px solid #EF9F27;vertical-align:middle;margin-right:2px"></span>k 行/列</span>
+          <span><span style="display:inline-block;width:9px;height:9px;background:#E6F1FB;border:.5px solid #378ADD;vertical-align:middle;margin-right:2px"></span>本步更新</span>
+        </div>
+      </div>
+      <div class="acard" style="flex:1">
+        <h3>本步說明</h3>
+        <div class="sdesc" id="fw-desc"></div>
+      </div>
+    </div>
+  </div>
+  <div class="actrl">
+    <button class="cb rst" onclick="fwReset()">↺ 重置</button>
+    <button class="cb" id="fw-prev" onclick="fwPrev()">← 上一步</button>
+    <span class="scnt" id="fw-cnt"></span>
+    <button class="cb" id="fw-next" onclick="fwNext()">下一步 →</button>
+  </div>
+</section>
+
+<!-- ========== MST ========== -->
+<section id="sec-mst" class="algo-section">
+  <div class="sec-hd">
+    <h2>最小生成樹（MST）</h2>
+    <p>Prim：從起點貪心生長 | Kruskal：排序邊 + Union-Find | 複雜度皆 O(E log E)</p>
+  </div>
+  <div class="atabs">
+    <button class="atab gon" onclick="mstSw(0,this)">Prim（從起點生長）</button>
+    <button class="atab" onclick="mstSw(1,this)">Kruskal（排序邊）</button>
+  </div>
+  <div class="alayout">
+    <div class="agraph">
+      <div class="leg" id="m-leg"></div>
+      <svg id="m-svg" viewBox="0 0 490 285" style="width:100%;height:auto;"></svg>
+    </div>
+    <div class="ainfo">
+      <div class="acard">
+        <h3 id="m-ph">候選邊（Priority Queue）</h3>
+        <div id="m-pb"></div>
+      </div>
+      <div class="acard" style="flex:1">
+        <h3>說明</h3>
+        <div class="sdesc" id="m-desc"></div>
+      </div>
+    </div>
+  </div>
+  <div class="actrl">
+    <button class="cb rst" onclick="mstReset()">↺ 重置</button>
+    <button class="cb grn" id="m-prev" onclick="mstPrev()">← 上一步</button>
+    <span class="scnt" id="m-cnt"></span>
+    <button class="cb grn" id="m-next" onclick="mstNext()">下一步 →</button>
+  </div>
+</section>
+
+<script>
+// ── NAVIGATION ────────────────────────────────────────────────
+function showSec(id,btn){
+  document.querySelectorAll('.algo-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── DIJKSTRA ──────────────────────────────────────────────────
+const DGRAPHS=[
+  {
+    nodes:[{id:'A',x:80,y:150},{id:'B',x:235,y:65},{id:'C',x:235,y:240},{id:'D',x:400,y:65},{id:'E',x:400,y:240}],
+    edges:[{f:'A',t:'B',w:4},{f:'A',t:'C',w:2},{f:'B',t:'C',w:1},{f:'B',t:'D',w:5},{f:'C',t:'D',w:8},{f:'C',t:'E',w:10},{f:'D',t:'E',w:2},{f:'B',t:'E',w:6}],
+    steps:[
+      {vis:[],cur:null,upd:[],dist:{A:0,B:1/0,C:1/0,D:1/0,E:1/0},prev:{A:null,B:null,C:null,D:null,E:null},re:[],
+       desc:'<b>初始化</b><br>起點 A = 0，其餘 = ∞。<br><br><b>核心思路：</b>每輪從未訪問節點中挑 dist 最小者（貪心）。因邊權非負，被選到即確定最短距離。<br><br>未訪問集合：{A, B, C, D, E}'},
+      {vis:['A'],cur:'A',upd:['B','C'],dist:{A:0,B:4,C:2,D:1/0,E:1/0},prev:{A:null,B:'A',C:'A',D:null,E:null},re:['A-B','A-C'],
+       desc:'<b>步驟 1：處理 A（dist=0）</b><br><br>鬆弛出邊：<br>• B: ∞ → 0+4 = <b>4</b> ✓<br>• C: ∞ → 0+2 = <b>2</b> ✓<br><br>A 標記為已確定。'},
+      {vis:['A','C'],cur:'C',upd:['B','D','E'],dist:{A:0,B:3,C:2,D:10,E:12},prev:{A:null,B:'C',C:'A',D:'C',E:'C'},re:['B-C','C-D','C-E'],
+       desc:'<b>步驟 2：處理 C（dist=2）</b><br><br>鬆弛出邊：<br>• B: min(4, 2+1) = <b>3</b> ✓ 更新！<br>• D: ∞ → 2+8 = <b>10</b> ✓<br>• E: ∞ → 2+10 = <b>12</b> ✓'},
+      {vis:['A','C','B'],cur:'B',upd:['D','E'],dist:{A:0,B:3,C:2,D:8,E:9},prev:{A:null,B:'C',C:'A',D:'B',E:'B'},re:['B-D','B-E'],
+       desc:'<b>步驟 3：處理 B（dist=3）</b><br><br>鬆弛出邊：<br>• D: min(10, 3+5) = <b>8</b> ✓ 更新！<br>• E: min(12, 3+6) = <b>9</b> ✓ 更新！'},
+      {vis:['A','C','B','D'],cur:'D',upd:[],dist:{A:0,B:3,C:2,D:8,E:9},prev:{A:null,B:'C',C:'A',D:'B',E:'B'},re:[],
+       desc:'<b>步驟 4：處理 D（dist=8）</b><br><br>• E: min(9, 8+2)=10（無更新）'},
+      {vis:['A','C','B','D','E'],cur:'E',upd:[],dist:{A:0,B:3,C:2,D:8,E:9},prev:{A:null,B:'C',C:'A',D:'B',E:'B'},re:[],done:true,
+       desc:'<b>步驟 5：處理 E（dist=9）</b><br><br>🎉 <b>完成！最短路徑（從 A）：</b><br>• A: 0<br>• C: 2（A→C）<br>• B: 3（A→C→B）<br>• D: 8（A→C→B→D）<br>• E: 9（A→C→B→E）'}
+    ]
+  },
+  {
+    nodes:[{id:'1',x:70,y:150},{id:'2',x:210,y:65},{id:'3',x:210,y:245},{id:'4',x:360,y:65},{id:'5',x:445,y:155},{id:'6',x:360,y:245}],
+    edges:[{f:'1',t:'2',w:7},{f:'1',t:'3',w:9},{f:'1',t:'6',w:14},{f:'2',t:'3',w:10},{f:'2',t:'4',w:15},{f:'3',t:'4',w:11},{f:'3',t:'6',w:2},{f:'4',t:'5',w:6},{f:'5',t:'6',w:9}],
+    steps:[
+      {vis:[],cur:null,upd:[],dist:{'1':0,'2':1/0,'3':1/0,'4':1/0,'5':1/0,'6':1/0},prev:{'1':null,'2':null,'3':null,'4':null,'5':null,'6':null},re:[],
+       desc:'<b>初始化</b><br>起點 1 = 0，其餘 = ∞。'},
+      {vis:['1'],cur:'1',upd:['2','3','6'],dist:{'1':0,'2':7,'3':9,'4':1/0,'5':1/0,'6':14},prev:{'1':null,'2':'1','3':'1','4':null,'5':null,'6':'1'},re:['1-2','1-3','1-6'],
+       desc:'<b>步驟 1：處理 1（dist=0）</b><br><br>• 2: ∞→<b>7</b> ✓<br>• 3: ∞→<b>9</b> ✓<br>• 6: ∞→<b>14</b> ✓'},
+      {vis:['1','2'],cur:'2',upd:['4'],dist:{'1':0,'2':7,'3':9,'4':22,'5':1/0,'6':14},prev:{'1':null,'2':'1','3':'1','4':'2','5':null,'6':'1'},re:['2-4'],
+       desc:'<b>步驟 2：處理 2（dist=7）</b><br><br>• 3: min(9,7+10)=9 無更新<br>• 4: ∞→<b>22</b> ✓'},
+      {vis:['1','2','3'],cur:'3',upd:['4','6'],dist:{'1':0,'2':7,'3':9,'4':20,'5':1/0,'6':11},prev:{'1':null,'2':'1','3':'1','4':'3','5':null,'6':'3'},re:['3-4','3-6'],
+       desc:'<b>步驟 3：處理 3（dist=9）</b><br><br>• 4: min(22,9+11)=<b>20</b> ✓ 更新！<br>• 6: min(14,9+2)=<b>11</b> ✓ 更新！'},
+      {vis:['1','2','3','6'],cur:'6',upd:['5'],dist:{'1':0,'2':7,'3':9,'4':20,'5':20,'6':11},prev:{'1':null,'2':'1','3':'1','4':'3','5':'6','6':'3'},re:['5-6'],
+       desc:'<b>步驟 4：處理 6（dist=11）</b><br><br>• 5: ∞→<b>20</b> ✓'},
+      {vis:['1','2','3','6','4'],cur:'4',upd:[],dist:{'1':0,'2':7,'3':9,'4':20,'5':20,'6':11},prev:{'1':null,'2':'1','3':'1','4':'3','5':'6','6':'3'},re:[],
+       desc:'<b>步驟 5：處理 4（dist=20）</b><br><br>• 5: min(20,20+6)=26 無更新'},
+      {vis:['1','2','3','6','4','5'],cur:'5',upd:[],dist:{'1':0,'2':7,'3':9,'4':20,'5':20,'6':11},prev:{'1':null,'2':'1','3':'1','4':'3','5':'6','6':'3'},re:[],done:true,
+       desc:'<b>步驟 6：處理 5（dist=20）</b><br><br>🎉 <b>完成！最短路徑（從 1）：</b><br>• 2: 7 | 3: 9 | 6: 11<br>• 4: 20（1→3→4）<br>• 5: 20（1→3→6→5）'}
+    ]
+  }
+];
+let dG=0,dS=0;
+function dEK(a,b){const s=[a,b].sort();return s[0]+'-'+s[1];}
+function dijRender(){
+  const g=DGRAPHS[dG],s=g.steps[dS];
+  let h='';
+  for(const e of g.edges){
+    const fn=g.nodes.find(n=>n.id===e.f),tn=g.nodes.find(n=>n.id===e.t);
+    const k=dEK(e.f,e.t),act=s.re.includes(k);
+    const mx=(fn.x+tn.x)/2,my=(fn.y+tn.y)/2;
+    const dx=tn.y-fn.y,dy=fn.x-tn.x,L=Math.sqrt(dx*dx+dy*dy)||1;
+    h+=`<line x1="${fn.x}" y1="${fn.y}" x2="${tn.x}" y2="${tn.y}" stroke="${act?'#378ADD':'#D3D1C7'}" stroke-width="${act?2.5:1.5}"/>`;
+    h+=`<text x="${mx+dx/L*13}" y="${my+dy/L*13}" text-anchor="middle" font-size="12" fill="${act?'#378ADD':'#B4B2A9'}" font-weight="${act?500:400}">${e.w}</text>`;
+  }
+  for(const n of g.nodes){
+    let c='#888780';
+    if(s.vis.includes(n.id)&&n.id!==s.cur)c='#1D9E75';
+    else if(n.id===s.cur)c='#BA7517';
+    else if(s.upd.includes(n.id))c='#185FA5';
+    const d=s.dist[n.id]===1/0?'∞':s.dist[n.id];
+    h+=`<circle cx="${n.x}" cy="${n.y}" r="21" fill="${c}"/>`;
+    h+=`<text x="${n.x}" y="${n.y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="white">${n.id}</text>`;
+    h+=`<text x="${n.x}" y="${n.y+34}" text-anchor="middle" font-size="12" fill="${c}" font-weight="500">${d}</text>`;
+  }
+  document.getElementById('d-svg').innerHTML=h;
+  let tb='';
+  for(const n of g.nodes){
+    let rc='';
+    if(s.vis.includes(n.id)&&n.id!==s.cur)rc='sfin';
+    else if(n.id===s.cur)rc='scur';
+    else if(s.upd.includes(n.id))rc='supd';
+    const d=s.dist[n.id]===1/0?'∞':s.dist[n.id];
+    const st=n.id===s.cur?'⚡':(s.vis.includes(n.id)?'✓':'-');
+    tb+=`<tr class="${rc}"><td><b>${n.id}</b></td><td>${d}</td><td>${s.prev[n.id]||'—'}</td><td style="font-size:10px">${st}</td></tr>`;
+  }
+  document.getElementById('d-tbody').innerHTML=tb;
+  document.getElementById('d-desc').innerHTML=s.desc;
+  const tot=g.steps.length-1;
+  document.getElementById('d-cnt').textContent=`步驟 ${dS} / ${tot}`;
+  document.getElementById('d-prev').disabled=dS===0;
+  document.getElementById('d-next').disabled=dS===tot;
+}
+function dijNext(){if(dS<DGRAPHS[dG].steps.length-1){dS++;dijRender();}}
+function dijPrev(){if(dS>0){dS--;dijRender();}}
+function dijReset(){dS=0;dijRender();}
+function dijSw(i,btn){dG=i;dS=0;document.querySelectorAll('#sec-dijkstra .atab').forEach((b,j)=>{b.classList.remove('on','gon');if(j===i)b.classList.add('on');});dijRender();}
+
+// ── BELLMAN-FORD ──────────────────────────────────────────────
+const BFD=[
+  {vn:5,
+   nodes:[{id:'A',x:78,y:148},{id:'B',x:240,y:60},{id:'C',x:240,y:238},{id:'D',x:400,y:60},{id:'E',x:400,y:238}],
+   edges:[{f:'A',t:'B',w:4},{f:'A',t:'C',w:2},{f:'C',t:'B',w:1},{f:'B',t:'D',w:5},{f:'C',t:'D',w:8},{f:'C',t:'E',w:10},{f:'D',t:'E',w:2},{f:'B',t:'E',w:6}],
+   steps:[
+     {rl:'初始',dist:{A:0,B:1/0,C:1/0,D:1/0,E:1/0},upd:[],ce:[],done:false,
+      desc:'<b>初始化</b><br>起點 A = 0，其餘 = ∞。<br><br><b>Bellman-Ford 核心：</b><br>共執行 <b>V−1 = 4 輪</b>，每輪對所有邊鬆弛：<br><code>if dist[u]+w &lt; dist[v]: dist[v] = dist[u]+w</code>'},
+     {rl:'第 1 輪',dist:{A:0,B:4,C:2,D:1/0,E:1/0},upd:['B','C'],ce:['A->B','A->C'],done:false,
+      desc:'<b>第 1 輪</b><br><br>• A→B: 0+4=<b>4</b> &lt; ∞ ✓<br>• A→C: 0+2=<b>2</b> &lt; ∞ ✓<br>其餘來源 ∞，無法更新'},
+     {rl:'第 2 輪',dist:{A:0,B:3,C:2,D:9,E:10},upd:['B','D','E'],ce:['C->B','B->D','B->E'],done:false,
+      desc:'<b>第 2 輪</b><br><br>• C→B: 2+1=<b>3</b> &lt; 4 ✓ B 再次更新！<br>• B→D: 4+5=<b>9</b> ✓（用上輪 B=4）<br>• B→E: 4+6=<b>10</b> ✓'},
+     {rl:'第 3 輪',dist:{A:0,B:3,C:2,D:8,E:9},upd:['D','E'],ce:['B->D','B->E'],done:false,
+      desc:'<b>第 3 輪</b><br><br>• B→D: 3+5=<b>8</b> &lt; 9 ✓ 更新！<br>• B→E: 3+6=<b>9</b> &lt; 10 ✓ 更新！'},
+     {rl:'第 4 輪',dist:{A:0,B:3,C:2,D:8,E:9},upd:[],ce:[],done:true,
+      desc:'<b>第 4 輪（最後）</b><br><br>無任何更新 → <b>收斂！</b><br><br>最終：A=0, C=2, B=3, D=8, E=9<br><br>⚠️ <b>負環偵測：</b>若額外執行第 5 輪仍有更新，表示存在負環。'}
+   ]},
+  {vn:4,
+   nodes:[{id:'S',x:72,y:148},{id:'A',x:265,y:62},{id:'B',x:265,y:240},{id:'C',x:455,y:148}],
+   edges:[{f:'S',t:'A',w:5},{f:'S',t:'B',w:8},{f:'A',t:'B',w:-4},{f:'B',t:'C',w:3},{f:'A',t:'C',w:6}],
+   steps:[
+     {rl:'初始',dist:{S:0,A:1/0,B:1/0,C:1/0},upd:[],ce:[],done:false,
+      desc:'<b>初始化</b><br>起點 S = 0，其餘 = ∞。<br><br>⚠️ 邊 A→B 權重為 <b>-4</b>（負邊）！<br><br>Dijkstra 無法處理此情況；Bellman-Ford 可以。<br>本圖需執行 <b>V−1 = 3 輪</b>。'},
+     {rl:'第 1 輪',dist:{S:0,A:5,B:8,C:1/0},upd:['A','B'],ce:['S->A','S->B'],done:false,
+      desc:'<b>第 1 輪</b><br><br>• S→A: 0+5=<b>5</b> ✓<br>• S→B: 0+8=<b>8</b> ✓<br>• A→B: ∞+(-4)=∞（A 仍 ∞）→ 無效<br><br>負邊第 1 輪未作用。'},
+     {rl:'第 2 輪',dist:{S:0,A:5,B:1,C:11},upd:['B','C'],ce:['A->B','B->C'],done:false,
+      desc:'<b>第 2 輪</b><br><br>• A→B: 5+(<b>-4</b>)=<b>1</b> &lt; 8 ✓ 負邊生效！<br>• B→C: 8+3=<b>11</b>（用上輪 B=8）✓<br><br>🔑 Dijkstra 第 1 輪就把 B 確定為 8 → <b>錯誤！</b>'},
+     {rl:'第 3 輪',dist:{S:0,A:5,B:1,C:4},upd:['C'],ce:['B->C'],done:true,
+      desc:'<b>第 3 輪（最後）</b><br><br>• B→C: 1+3=<b>4</b> &lt; 11 ✓<br><br>🎉 <b>正確答案：</b>S=0, A=5, B=1, C=4<br>Dijkstra 的錯誤答案：B=8, C=11'}
+   ]}
+];
+let bfG=0,bfS=0;
+function bfAP(fn,tn,r=22){
+  const dx=tn.x-fn.x,dy=tn.y-fn.y,L=Math.sqrt(dx*dx+dy*dy)||1,ux=dx/L,uy=dy/L;
+  return{x1:fn.x+ux*(r+1),y1:fn.y+uy*(r+1),x2:tn.x-ux*(r+6),y2:tn.y-uy*(r+6),
+    lx:(fn.x+tn.x)/2+(-uy)*13,ly:(fn.y+tn.y)/2+(ux)*13};
+}
+function bfRender(){
+  const g=BFD[bfG],s=g.steps[bfS];
+  let h='<defs>'
+    +'<marker id="bfa0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#B4B2A9"/></marker>'
+    +'<marker id="bfa1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#378ADD"/></marker>'
+    +'<marker id="bfa2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#D85A30"/></marker>'
+    +'</defs>';
+  for(const e of g.edges){
+    const fn=g.nodes.find(n=>n.id===e.f),tn=g.nodes.find(n=>n.id===e.t);
+    const{x1,y1,x2,y2,lx,ly}=bfAP(fn,tn);
+    const key=e.f+'->'+e.t,act=s.ce.includes(key),neg=e.w<0;
+    let sc='#B4B2A9',sw=1.5,mid='bfa0';
+    if(act&&neg){sc='#D85A30';sw=2.5;mid='bfa2';}
+    else if(act){sc='#378ADD';sw=2.5;mid='bfa1';}
+    else if(neg){sc='#993C1D';sw=1.5;mid='bfa2';}
+    h+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${sc}" stroke-width="${sw}" marker-end="url(#${mid})"/>`;
+    h+=`<text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" fill="${act?(neg?'#D85A30':'#378ADD'):(neg?'#993C1D':'#B4B2A9')}" font-weight="${neg||act?500:400}">${e.w}</text>`;
+  }
+  for(const n of g.nodes){
+    let c='#888780';
+    if(s.done)c='#1D9E75';
+    else if(s.upd.includes(n.id))c='#185FA5';
+    else if(s.dist[n.id]<1/0)c='#5DCAA5';
+    h+=`<circle cx="${n.x}" cy="${n.y}" r="21" fill="${c}"/>`;
+    h+=`<text x="${n.x}" y="${n.y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="white">${n.id}</text>`;
+    h+=`<text x="${n.x}" y="${n.y+34}" text-anchor="middle" font-size="12" fill="${c}" font-weight="500">${s.dist[n.id]===1/0?'∞':s.dist[n.id]}</text>`;
+  }
+  document.getElementById('bf-svg').innerHTML=h;
+  let tb='';
+  for(const n of g.nodes){
+    let rc='';
+    if(s.done)rc='sfin';
+    else if(s.upd.includes(n.id))rc='supd';
+    else if(s.dist[n.id]<1/0)rc='shas';
+    const icon=s.done?'✓':(s.upd.includes(n.id)?'↑':'-');
+    tb+=`<tr class="${rc}"><td><b>${n.id}</b></td><td>${s.dist[n.id]===1/0?'∞':s.dist[n.id]}</td><td style="font-size:10px">${icon}</td></tr>`;
+  }
+  document.getElementById('bf-tbody').innerHTML=tb;
+  document.getElementById('bf-desc').innerHTML=s.desc;
+  document.getElementById('bf-cnt').textContent=`${s.rl} | V−1=${g.vn-1}`;
+  const tot=g.steps.length-1;
+  document.getElementById('bf-prev').disabled=bfS===0;
+  document.getElementById('bf-next').disabled=bfS===tot;
+}
+function bfNext(){if(bfS<BFD[bfG].steps.length-1){bfS++;bfRender();}}
+function bfPrev(){if(bfS>0){bfS--;bfRender();}}
+function bfReset(){bfS=0;bfRender();}
+function bfSw(i,btn){bfG=i;bfS=0;document.querySelectorAll('#sec-bf .atab').forEach((b,j)=>{b.classList.remove('on','gon');if(j===i)b.classList.add('on');});bfRender();}
+
+// ── FLOYD-WARSHALL ────────────────────────────────────────────
+const FWN=['A','B','C','D'];
+const FWP=[{x:75,y:145},{x:245,y:62},{x:245,y:233},{x:415,y:145}];
+const FWE=[{f:0,t:1,w:3},{f:0,t:2,w:8},{f:1,t:2,w:2},{f:2,t:3,w:1},{f:3,t:1,w:4},{f:3,t:0,w:2}];
+const FWS=[
+  {k:null,m:[[0,3,8,1/0],[1/0,0,2,1/0],[1/0,1/0,0,1],[2,4,1/0,0]],ch:[],done:false,
+   desc:'<b>初始化距離矩陣</b><br>直接有邊→填邊權；自己=0；無邊=∞。<br><br><b>Floyd-Warshall DP：</b><br>逐一把節點 k 納入「可用中繼站」：<br><code>dist[i][j]=min(dist[i][j], dist[i][k]+dist[k][j])</code><br>三層迴圈 k→i→j，時間 O(V³)。'},
+  {k:0,m:[[0,3,8,1/0],[1/0,0,2,1/0],[1/0,1/0,0,1],[2,4,10,0]],ch:[[3,2]],done:false,
+   desc:'<b>k = A（中繼站 A）</b><br><br>更新：<br>• D→A→C: 2+8=<b>10</b> &lt; ∞ ✓'},
+  {k:1,m:[[0,3,5,1/0],[1/0,0,2,1/0],[1/0,1/0,0,1],[2,4,6,0]],ch:[[0,2],[3,2]],done:false,
+   desc:'<b>k = B（中繼站 B）</b><br><br>• A→B→C: 3+2=<b>5</b> &lt; 8 ✓<br>• D→B→C: 4+2=<b>6</b> &lt; 10 ✓'},
+  {k:2,m:[[0,3,5,6],[1/0,0,2,3],[1/0,1/0,0,1],[2,4,6,0]],ch:[[0,3],[1,3]],done:false,
+   desc:'<b>k = C（中繼站 C）</b><br><br>• A→C→D: 5+1=<b>6</b> &lt; ∞ ✓（用上步 dist[A][C]=5）<br>• B→C→D: 2+1=<b>3</b> &lt; ∞ ✓'},
+  {k:3,m:[[0,3,5,6],[5,0,2,3],[3,5,0,1],[2,4,6,0]],ch:[[1,0],[2,0],[2,1]],done:true,
+   desc:'<b>k = D（中繼站 D）</b><br><br>• B→D→A: 3+2=<b>5</b> ✓<br>• C→D→A: 1+2=<b>3</b> ✓<br>• C→D→B: 1+4=<b>5</b> ✓<br><br>🎉 <b>完成！所有點對最短路徑求出。</b><br>負環檢測：若 dist[i][i] &lt; 0 → 存在負環。'}
+];
+let fwS=0;
+function fwAP(f,t){
+  const fn=FWP[f],tn=FWP[t];
+  const dx=tn.x-fn.x,dy=tn.y-fn.y,L=Math.sqrt(dx*dx+dy*dy)||1,ux=dx/L,uy=dy/L;
+  return{x1:fn.x+ux*23,y1:fn.y+uy*23,x2:tn.x-ux*28,y2:tn.y-uy*28,
+    lx:(fn.x+tn.x)/2+(-uy)*14,ly:(fn.y+tn.y)/2+(ux)*14};
+}
+function fwRender(){
+  const s=FWS[fwS];
+  let h='<defs>'
+    +'<marker id="fwa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#B4B2A9"/></marker>'
+    +'<marker id="fwk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#EF9F27"/></marker>'
+    +'</defs>';
+  for(const e of FWE){
+    const{x1,y1,x2,y2,lx,ly}=fwAP(e.f,e.t);
+    const ak=s.k!==null&&(e.f===s.k||e.t===s.k);
+    h+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${ak?'#EF9F27':'#B4B2A9'}" stroke-width="${ak?2.5:1.5}" marker-end="url(#${ak?'fwk':'fwa'})"/>`;
+    h+=`<text x="${lx}" y="${ly}" text-anchor="middle" font-size="12" fill="${ak?'#EF9F27':'#B4B2A9'}" font-weight="${ak?500:400}">${e.w}</text>`;
+  }
+  for(let i=0;i<4;i++){
+    const n=FWP[i];
+    const c=s.done?'#1D9E75':(s.k===i?'#EF9F27':'#888780');
+    h+=`<circle cx="${n.x}" cy="${n.y}" r="22" fill="${c}"/>`;
+    h+=`<text x="${n.x}" y="${n.y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="white">${FWN[i]}</text>`;
+    if(s.k===i&&!s.done)h+=`<text x="${n.x}" y="${n.y+38}" text-anchor="middle" font-size="11" fill="#EF9F27">中繼 k</text>`;
+  }
+  document.getElementById('fw-svg').innerHTML=h;
+  const cs=new Set(s.ch.map(([r,c])=>r+','+c));
+  let hr='<th></th>';
+  FWN.forEach((n,c)=>{hr+=`<th class="${s.k===c?'kth':''}">${n}</th>`;});
+  document.getElementById('fw-head').innerHTML=hr;
+  let tb='';
+  for(let r=0;r<4;r++){
+    tb+=`<tr><th class="${s.k===r?'kth':''}">${FWN[r]}</th>`;
+    for(let c=0;c<4;c++){
+      const kh=s.k!==null&&(r===s.k||c===s.k),up=cs.has(r+','+c),dg=r===c;
+      let cl=up?'upd':(kh?'khl':'');if(dg&&!up)cl=cl?cl+' diag':'diag';
+      tb+=`<td class="${cl}">${s.m[r][c]===1/0?'∞':s.m[r][c]}</td>`;
+    }
+    tb+='</tr>';
+  }
+  document.getElementById('fw-body').innerHTML=tb;
+  document.getElementById('fw-desc').innerHTML=s.desc;
+  document.getElementById('fw-badge').innerHTML=s.k!==null?`<span class="kbg">k = ${FWN[s.k]}</span>`:'';
+  document.getElementById('fw-cnt').textContent=fwS===0?'初始化':(s.done?`k=${FWN[s.k]}（完成）`:`k=${FWN[s.k]}（${fwS}/${FWN.length}）`);
+  document.getElementById('fw-prev').disabled=fwS===0;
+  document.getElementById('fw-next').disabled=fwS===FWS.length-1;
+}
+function fwNext(){if(fwS<FWS.length-1){fwS++;fwRender();}}
+function fwPrev(){if(fwS>0){fwS--;fwRender();}}
+function fwReset(){fwS=0;fwRender();}
+
+// ── MST (PRIM + KRUSKAL) ──────────────────────────────────────
+const MN=['A','B','C','D','E'];
+const MP=[{x:80,y:145},{x:245,y:62},{x:245,y:232},{x:410,y:62},{x:410,y:232}];
+const ME=[{u:0,v:1,w:2},{u:0,v:2,w:3},{u:1,v:2,w:1},{u:1,v:3,w:4},{u:2,v:3,w:5},{u:2,v:4,w:6},{u:3,v:4,w:3}];
+const MGC=['#185FA5','#BA7517','#7F77DD','#1D9E75','#D85A30'];
+function mEK(a,b){return a<b?a+'-'+b:b+'-'+a;}
+
+const PRIM=[
+  {tree:[0],mst:[],add:null,cands:[{u:0,v:1,w:2},{u:0,v:2,w:3}],
+   desc:'<b>初始化：起點 A</b><br>A 加入樹。<br><br>找出 A 的相鄰邊作為候選：A-B(2), A-C(3)。<br><br>Prim 每步從 Priority Queue 選最小邊，若對端不在樹中則加入。'},
+  {tree:[0,1],mst:['A-B'],add:{u:0,v:1,w:2},cands:[{u:1,v:2,w:1},{u:0,v:2,w:3},{u:1,v:3,w:4}],
+   desc:'<b>選 A-B（w=2）</b><br>B 加入樹。<br><br>更新候選：+ B-C(1), B-D(4)<br>當前候選：B-C(1), A-C(3), B-D(4)'},
+  {tree:[0,1,2],mst:['A-B','B-C'],add:{u:1,v:2,w:1},cands:[{u:1,v:3,w:4},{u:2,v:3,w:5},{u:2,v:4,w:6}],
+   desc:'<b>選 B-C（w=1）</b><br>C 加入樹。<br><br>+ C-D(5), C-E(6)；- A-C（兩端都在樹中）<br>當前候選：B-D(4), C-D(5), C-E(6)'},
+  {tree:[0,1,2,3],mst:['A-B','B-C','B-D'],add:{u:1,v:3,w:4},cands:[{u:3,v:4,w:3},{u:2,v:4,w:6}],
+   desc:'<b>選 B-D（w=4）</b><br>D 加入樹。<br><br>+ D-E(3)；- C-D（兩端都在樹中）<br>當前候選：D-E(3), C-E(6)'},
+  {tree:[0,1,2,3,4],mst:['A-B','B-C','B-D','D-E'],add:{u:3,v:4,w:3},cands:[],done:true,
+   desc:'<b>選 D-E（w=3）</b><br>E 加入樹。所有節點已加入！<br><br>🎉 <b>MST 完成！</b><br>A-B(2)+B-C(1)+B-D(4)+D-E(3)<br><b>總權重 = 10</b>'}
+];
+const KS=[{u:1,v:2,w:1},{u:0,v:1,w:2},{u:0,v:2,w:3},{u:3,v:4,w:3},{u:1,v:3,w:4},{u:2,v:3,w:5},{u:2,v:4,w:6}];
+const KRUSKAL=[
+  {mst:[],cur:-1,st:null,done:false,grps:[[0],[1],[2],[3],[4]],
+   desc:'<b>初始化</b><br>所有邊按權重升序排列。<br><br><b>Union-Find 初始：</b>每節點各自一集合（節點顏色=集合）。<br><br>依序嘗試最小邊：<br>• 不同集合 → 加入 MST，Union<br>• 同一集合 → 跳過（成環）<br>直到有 V−1=4 條邊。'},
+  {mst:['B-C'],cur:0,st:'add',done:false,grps:[[0],[1,2],[3],[4]],
+   desc:'<b>嘗試 B-C（w=1）</b><br>B={B}，C={C}，不同集合 → <b>加入 ✓</b><br>Union：{B}∪{C}→{B,C}'},
+  {mst:['B-C','A-B'],cur:1,st:'add',done:false,grps:[[0,1,2],[3],[4]],
+   desc:'<b>嘗試 A-B（w=2）</b><br>A={A}，B∈{B,C}，不同集合 → <b>加入 ✓</b><br>Union：{A}∪{B,C}→{A,B,C}'},
+  {mst:['B-C','A-B'],cur:2,st:'skip',done:false,grps:[[0,1,2],[3],[4]],
+   desc:'<b>嘗試 A-C（w=3）</b><br>A,C 都在 {A,B,C}，<b>同一集合 → 跳過 ✗</b><br>加入 A-C 會形成環 A→B→C→A。'},
+  {mst:['B-C','A-B','D-E'],cur:3,st:'add',done:false,grps:[[0,1,2],[3,4]],
+   desc:'<b>嘗試 D-E（w=3）</b><br>D={D}，E={E}，不同集合 → <b>加入 ✓</b><br>Union：{D}∪{E}→{D,E}'},
+  {mst:['B-C','A-B','D-E','B-D'],cur:4,st:'add',done:true,grps:[[0,1,2,3,4]],
+   desc:'<b>嘗試 B-D（w=4）</b><br>B∈{A,B,C}，D∈{D,E}，不同集合 → <b>加入 ✓</b><br>Union 後：{A,B,C,D,E}<br><br>已有 V−1=4 條邊 🎉<br><b>MST 完成！總權重 = 10</b>'}
+];
+let mstG=0,mstS=0;
+function mstRender(){
+  const s=mstG===0?PRIM[mstS]:KRUSKAL[mstS];
+  const ms=new Set(s.mst);
+  let h='';
+  for(const e of ME){
+    const k=mEK(MN[e.u],MN[e.v]),fn=MP[e.u],tn=MP[e.v];
+    const inM=ms.has(k);
+    let isCur=false;
+    if(mstG===0&&s.add)isCur=mEK(MN[s.add.u],MN[s.add.v])===k;
+    else if(mstG===1&&s.cur>=0)isCur=mEK(MN[KS[s.cur].u],MN[KS[s.cur].v])===k;
+    let sc='#D3D1C7',sw=1.5;
+    if(inM){sc='#1D9E75';sw=3;}
+    else if(isCur&&mstG===1&&s.st==='skip'){sc='#E24B4A';sw=2.5;}
+    else if(isCur){sc='#EF9F27';sw=2.5;}
+    const mx=(fn.x+tn.x)/2,my=(fn.y+tn.y)/2;
+    const dx=tn.y-fn.y,dy=fn.x-tn.x,L=Math.sqrt(dx*dx+dy*dy)||1;
+    h+=`<line x1="${fn.x}" y1="${fn.y}" x2="${tn.x}" y2="${tn.y}" stroke="${sc}" stroke-width="${sw}"/>`;
+    h+=`<text x="${mx+dx/L*13}" y="${my+dy/L*13}" text-anchor="middle" font-size="12" fill="${inM||isCur?sc:'#B4B2A9'}" font-weight="${inM||isCur?500:400}">${e.w}</text>`;
+  }
+  for(let i=0;i<MN.length;i++){
+    const n=MP[i];
+    let c='#888780';
+    if(s.done)c='#1D9E75';
+    else if(mstG===0)c=s.tree.includes(i)?'#1D9E75':'#888780';
+    else{for(let g2=0;g2<s.grps.length;g2++){if(s.grps[g2].includes(i)){c=MGC[g2];break;}}}
+    h+=`<circle cx="${n.x}" cy="${n.y}" r="22" fill="${c}"/>`;
+    h+=`<text x="${n.x}" y="${n.y}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="white">${MN[i]}</text>`;
+  }
+  document.getElementById('m-svg').innerHTML=h;
+  document.getElementById('m-leg').innerHTML=mstG===0
+    ?'<div class="li"><div class="ld" style="background:#888780"></div>未加入</div><div class="li"><div class="ld" style="background:#1D9E75"></div>已在樹中</div><div class="li"><span style="display:inline-block;width:16px;height:3px;background:#EF9F27;vertical-align:middle"></span>&nbsp;當前選取</div>'
+    :'<div class="li" style="font-size:11px">節點顏色 = Union-Find 所屬集合</div>';
+  document.getElementById('m-ph').textContent=mstG===0?'候選邊（Priority Queue）':'排序後邊列表（Kruskal）';
+  if(mstG===0){
+    const cd=s.cands||[];
+    if(!cd.length&&s.done){
+      document.getElementById('m-pb').innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:6px">空 — MST 完成</div>';
+    }else{
+      let t='<table class="etbl"><thead><tr><th></th><th>邊</th><th>w</th></tr></thead><tbody>';
+      cd.forEach((c,i)=>{t+=`<tr class="${i===0?'ecur':''}"><td style="font-size:10px">${i===0?'→最小':''}</td><td>${MN[c.u]}-${MN[c.v]}</td><td>${c.w}</td></tr>`;});
+      document.getElementById('m-pb').innerHTML=t+'</tbody></table>';
+    }
+  }else{
+    let t='<table class="etbl"><thead><tr><th>狀態</th><th>邊</th><th>w</th></tr></thead><tbody>';
+    KS.forEach((e,i)=>{
+      const k=mEK(MN[e.u],MN[e.v]);
+      const past=i<s.cur||(i===s.cur&&s.done);
+      const cur=i===s.cur&&!s.done;
+      let rc='',icon='';
+      if(cur){rc=s.st==='add'?'ecur':'eskip';icon='→';}
+      else if(past){if(ms.has(k)){rc='eadd';icon='✓';}else{rc='eskip';icon='✗';}}
+      t+=`<tr class="${rc}"><td style="font-size:11px">${icon}</td><td>${MN[e.u]}-${MN[e.v]}</td><td>${e.w}</td></tr>`;
+    });
+    document.getElementById('m-pb').innerHTML=t+'</tbody></table>';
+  }
+  document.getElementById('m-desc').innerHTML=s.desc;
+  const wt=[...s.mst].reduce((sm,k)=>{const e=ME.find(e=>mEK(MN[e.u],MN[e.v])===k);return sm+(e?e.w:0);},0);
+  const tot=(mstG===0?PRIM:KRUSKAL).length-1;
+  document.getElementById('m-cnt').textContent=`步驟 ${mstS}/${tot}  | w=${wt}`;
+  document.getElementById('m-prev').disabled=mstS===0;
+  document.getElementById('m-next').disabled=mstS===tot;
+}
+function mstNext(){const t=(mstG===0?PRIM:KRUSKAL).length-1;if(mstS<t){mstS++;mstRender();}}
+function mstPrev(){if(mstS>0){mstS--;mstRender();}}
+function mstReset(){mstS=0;mstRender();}
+function mstSw(i,btn){mstG=i;mstS=0;document.querySelectorAll('#sec-mst .atab').forEach((b,j)=>{b.classList.remove('on','gon');if(j===i)b.classList.add('gon');});mstRender();}
+
+// ── INIT ──────────────────────────────────────────────────────
+dijRender();bfRender();fwRender();mstRender();
+</script>
+</body>
+</html>
